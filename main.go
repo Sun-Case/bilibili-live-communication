@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"time"
 )
 
 func main() {
@@ -25,8 +26,6 @@ func main() {
 		log.Panicln(err)
 	}
 
-	//time.Sleep(time.Second * 5)
-
 	wsHost := fmt.Sprintf("wss://%s/sub", hosts[0])
 	log.Println(wsHost)
 	c, _, err := websocket.DefaultDialer.Dial(wsHost, nil)
@@ -41,8 +40,9 @@ func main() {
 		}
 	}(c)
 
-	receiveChannel := make(chan []byte, 1)
-	blw := biliWebsocket.NewBiliLiveWebsocket(c, &receiveChannel, func(liveWebsocket *biliWebsocket.BiliLiveWebsocket) []byte {
+	sendCannel := make(chan []byte)
+	receiveChannel := make(chan []byte)
+	blw := biliWebsocket.NewBiliLiveWebsocket(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliLiveWebsocket) []byte {
 		var convStruct biliDataConv.BiliConvStruct
 
 		// 注意，如果获取弹幕地址及Token时，没有携带账号的Cookie，则下面的uid必须为0，否则鉴权失败，直接断开连接
@@ -52,27 +52,34 @@ func main() {
 			log.Panicln(err)
 		}
 		return convStruct.Bin
-	}, func(liveWebsocket *biliWebsocket.BiliLiveWebsocket) []byte {
-		var convStruct biliDataConv.BiliConvStruct
-
-		if err := convStruct.Encode(0x01, 0x00000002, 0x00000001, []byte("[object Object]")); err != nil {
-			log.Panicln(err)
-		}
-		return convStruct.Bin
 	})
+
+	go func() {
+		for {
+			select {
+			case <-blw.IsClosedCh:
+				return
+			default:
+				time.Sleep(time.Second * 30)
+				sendCannel <- heartbeat()
+			}
+		}
+	}()
 
 	for {
 		select {
+		case <-blw.IsClosedCh:
+			return
 		case b, ok := <-receiveChannel:
 			if !ok {
-				blw.Stop()
 				return
 			}
 			if slice, err := biliDataConv.Decode(b); err == nil {
 				for _, v := range slice {
 					switch biliJsonConv.GetCmdType(v.Body) {
 					case biliJsonConv.DanMuMsgType:
-						log.Println(biliJsonConv.DanMuMsg(v.Body))
+						b, err := biliJsonConv.DanMuMsg(v.Body)
+						log.Println(b.Name, ":", b.Msg, err)
 					case biliJsonConv.ErrorType:
 						log.Println("Error Type:", string(v.Body))
 					case biliJsonConv.UnknownType:
@@ -86,4 +93,13 @@ func main() {
 			}
 		}
 	}
+}
+
+func heartbeat() []byte {
+	var convStruct biliDataConv.BiliConvStruct
+
+	if err := convStruct.Encode(0x01, 0x00000002, 0x00000001, []byte("[object Object]")); err != nil {
+		log.Panicln(err)
+	}
+	return convStruct.Bin
 }
