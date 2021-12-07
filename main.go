@@ -78,8 +78,17 @@ func main() {
 				for _, v := range slice {
 					switch biliJsonConv.GetCmdType(v.Body) {
 					case biliJsonConv.DanMuMsgType:
-						b, err := biliJsonConv.DanMuMsg(v.Body)
-						log.Println(b.Name, ":", b.Msg, err)
+						if b, err := biliJsonConv.DanMuMsg(v.Body); err == nil {
+							log.Printf("%s: %s", b.Name, b.Msg)
+						} else {
+							log.Println(err)
+						}
+					case biliJsonConv.InteractWordType:
+						if b, err := biliJsonConv.InteractWord(v.Body); err == nil {
+							log.Println(b.UName, "进入直播间")
+						} else {
+							log.Println(err)
+						}
 					case biliJsonConv.ErrorType:
 						log.Println("Error Type:", string(v.Body))
 					case biliJsonConv.UnknownType:
