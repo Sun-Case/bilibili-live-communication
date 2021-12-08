@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
-	"time"
 )
 
 func main() {
@@ -42,29 +41,18 @@ func main() {
 
 	sendCannel := make(chan []byte)
 	receiveChannel := make(chan []byte)
-	blw := biliWebsocket.NewBiliLiveWebsocket(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliLiveWebsocket) []byte {
-		var convStruct biliDataConv.BiliConvStruct
+	blw := biliWebsocket.New(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliWebsocket) []byte {
+		var b []byte
+		var err error
 
 		// 注意，如果获取弹幕地址及Token时，没有携带账号的Cookie，则下面的uid必须为0，否则鉴权失败，直接断开连接
 		data := fmt.Sprintf("{\"uid\":0,\"roomid\":%s,\"protover\":3,\"platform\":\"web\",\"type\":2,\"key\":\"%s\"}", rid, token)
 		log.Println(data)
-		if err := convStruct.Encode(0x01, 0x00000007, 0x00000001, []byte(data)); err != nil {
+		if b, err = biliDataConv.Encode(0x01, 0x00000007, 0x00000001, []byte(data)); err != nil {
 			log.Panicln(err)
 		}
-		return convStruct.Bin
+		return b
 	})
-
-	go func() {
-		for {
-			select {
-			case <-blw.IsClosedCh:
-				return
-			default:
-				time.Sleep(time.Second * 30)
-				sendCannel <- heartbeat()
-			}
-		}
-	}()
 
 	for {
 		select {
@@ -74,41 +62,42 @@ func main() {
 			if !ok {
 				return
 			}
-			if slice, err := biliDataConv.Decode(b); err == nil {
-				for _, v := range slice {
-					switch biliJsonConv.GetCmdType(v.Body) {
-					case biliJsonConv.DanMuMsgType:
-						if b, err := biliJsonConv.DanMuMsg(v.Body); err == nil {
-							log.Printf("%s: %s", b.Name, b.Msg)
-						} else {
-							log.Println(err)
-						}
-					case biliJsonConv.InteractWordType:
-						if b, err := biliJsonConv.InteractWord(v.Body); err == nil {
-							log.Println(b.UName, "进入直播间")
-						} else {
-							log.Println(err)
-						}
-					case biliJsonConv.ErrorType:
-						log.Println("Error Type:", string(v.Body))
-					case biliJsonConv.UnknownType:
-						fallthrough
-					default:
-						//log.Println(string(v.Body))
-					}
+			switch biliJsonConv.GetCmdType(b) {
+			case biliJsonConv.DanMuMsgType:
+				if b, err := biliJsonConv.DanMuMsg(b); err == nil {
+					log.Printf("%s: %s", b.Name, b.Msg)
+				} else {
+					log.Println(err)
 				}
-			} else {
-				log.Println(err)
+			case biliJsonConv.InteractWordType:
+				if b, err := biliJsonConv.InteractWord(b); err == nil {
+					log.Println(b.UName, "进入直播间")
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.OnlineRankCountType:
+				if b, err := biliJsonConv.OnlineRankCount(b); err == nil {
+					log.Println("在线排名统计:", b.Count)
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.StopLiveRoomListType:
+				if b, err := biliJsonConv.StopLiveRoomList(b); err == nil {
+					log.Println("下播直播间ID:", b.RoomIdList)
+				}
+			case biliJsonConv.RoomRealTimeMessageUpdateType:
+				if b, err := biliJsonConv.RoomRealTimeMessageUpdate(b); err == nil {
+					log.Printf("直播间: %s, 粉丝数: %s, 粉丝团数: %s\n", b.RoomId, b.Fans, b.FansClub)
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.ErrorType:
+				log.Println("Error Type:", string(b))
+			case biliJsonConv.UnknownType:
+				fallthrough
+			default:
+				log.Println(string(b))
 			}
 		}
 	}
-}
-
-func heartbeat() []byte {
-	var convStruct biliDataConv.BiliConvStruct
-
-	if err := convStruct.Encode(0x01, 0x00000002, 0x00000001, []byte("[object Object]")); err != nil {
-		log.Panicln(err)
-	}
-	return convStruct.Bin
 }

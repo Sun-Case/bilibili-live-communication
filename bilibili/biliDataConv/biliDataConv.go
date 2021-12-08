@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/google/brotli/go/cbrotli"
 	"io"
+	"log"
 	"unsafe"
 )
 
@@ -23,53 +24,70 @@ type BiliConvStruct struct {
 	Header BaseHeader
 	Body   []uint8
 
-	Bin []uint8
+	//Bin []uint8
 }
 
-func (cs *BiliConvStruct) Decode(buf *bytes.Reader) error {
-	var err error
+//func (cs *BiliConvStruct) Decode(buf *bytes.Reader) error {
+//	var err error
+//
+//	if err = binary.Read(buf, binary.BigEndian, &cs.Header); err == nil {
+//
+//		if int(cs.Header.PackLen) == int(cs.Header.HeaderSize)+buf.Len() {
+//
+//			cs.Body = make([]uint8, cs.Header.PackLen-uint32(cs.Header.HeaderSize))
+//
+//			err = binary.Read(buf, binary.BigEndian, &cs.Body)
+//
+//		} else {
+//			err = errors.New(fmt.Sprintf("PackLen: %d, RawHanderSize: %d, BufLen: %d\n", cs.Header.PackLen, cs.Header.HeaderSize, buf.Len()))
+//		}
+//
+//	}
+//
+//	return err
+//}
+//
+//func (cs *BiliConvStruct) Encode(ver uint16, operation uint32, seqId uint32, body []uint8) error {
+//	cs.Header = struct {
+//		PackLen    uint32
+//		HeaderSize uint16
+//		Version    uint16
+//		Operation  uint32
+//		Sequence   uint32
+//	}{PackLen: 16 + uint32(len(body)), HeaderSize: 16, Version: ver, Operation: operation, Sequence: seqId}
+//	cs.Body = body
+//
+//	var buf bytes.Buffer
+//	var err error
+//
+//	if err = binary.Write(&buf, binary.BigEndian, &cs.Header); err == nil {
+//
+//		if err = binary.Write(&buf, binary.BigEndian, &cs.Body); err == nil {
+//
+//			cs.Bin = buf.Bytes()
+//
+//		}
+//
+//	}
+//
+//	return err
+//}
 
-	if err = binary.Read(buf, binary.BigEndian, &cs.Header); err == nil {
-
-		if int(cs.Header.PackLen) == int(cs.Header.HeaderSize)+buf.Len() {
-
-			cs.Body = make([]uint8, cs.Header.PackLen-uint32(cs.Header.HeaderSize))
-
-			err = binary.Read(buf, binary.BigEndian, &cs.Body)
-
-		} else {
-			err = errors.New(fmt.Sprintf("PackLen: %d, RawHanderSize: %d, BufLen: %d\n", cs.Header.PackLen, cs.Header.HeaderSize, buf.Len()))
-		}
-
-	}
-
-	return err
-}
-
-func (cs *BiliConvStruct) Encode(ver uint16, operation uint32, seqId uint32, body []uint8) error {
-	cs.Header = struct {
-		PackLen    uint32
-		HeaderSize uint16
-		Version    uint16
-		Operation  uint32
-		Sequence   uint32
-	}{PackLen: 16 + uint32(len(body)), HeaderSize: 16, Version: ver, Operation: operation, Sequence: seqId}
-	cs.Body = body
-
+func Encode(ver uint16, operation uint32, sequence uint32, body []uint8) ([]byte, error) {
+	bh := BaseHeader{
+		PackLen:    uint32(unsafe.Sizeof(BaseHeader{})) + uint32(len(body)),
+		HeaderSize: uint16(unsafe.Sizeof(BaseHeader{})),
+		Version:    ver,
+		Operation:  operation,
+		Sequence:   sequence}
 	var buf bytes.Buffer
 	var err error
 
-	if err = binary.Write(&buf, binary.BigEndian, &cs.Header); err == nil {
-
-		if err = binary.Write(&buf, binary.BigEndian, &cs.Body); err == nil {
-
-			cs.Bin = buf.Bytes()
-
-		}
-
+	if err = binary.Write(&buf, binary.BigEndian, &bh); err == nil {
+		err = binary.Write(&buf, binary.BigEndian, &body)
 	}
 
-	return err
+	return buf.Bytes(), err
 }
 
 func Decode(b []byte) ([]BiliConvStruct, error) {
@@ -96,6 +114,7 @@ func Decode(b []byte) ([]BiliConvStruct, error) {
 		fallthrough
 	case 1:
 		if bh.Operation == 3 { // 心跳包回复
+			log.Println("Heartbeat Receive")
 			goto Label
 		}
 
