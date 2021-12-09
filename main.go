@@ -7,11 +7,21 @@ import (
 	"bilibili-live-communication/bilibili/biliWebsocket"
 	"fmt"
 	"github.com/gorilla/websocket"
+	jsoniter "github.com/json-iterator/go"
 	"log"
+	"os"
+	"strconv"
+	"time"
 )
 
+var KV map[string]string
+
 func main() {
-	rid := ""
+	fb, _ := os.ReadFile("config.json")
+
+	_ = jsoniter.Unmarshal(fb, &KV)
+
+	rid := KV["room_id"]
 
 	// 获取真正直播间ID
 	rid, err := biliAPI.GetRoomInfo(rid)
@@ -97,7 +107,23 @@ func main() {
 				fallthrough
 			default:
 				log.Println(string(b))
+				save(b)
 			}
+		}
+	}
+}
+
+func save(b []byte) {
+	var cmd struct {
+		Cmd string `json:"cmd"`
+	}
+	if err := jsoniter.Unmarshal(b, &cmd); err != nil {
+		return
+	} else {
+		if err := os.MkdirAll(KV["save_path"]+cmd.Cmd, 0755); err != nil {
+			return
+		} else {
+			_ = os.WriteFile(KV["save_path"]+cmd.Cmd+"/"+strconv.FormatUint(uint64(time.Now().UnixNano()), 10)+".json", b, 0644)
 		}
 	}
 }

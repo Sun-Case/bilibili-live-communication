@@ -2,13 +2,11 @@ package biliJsonConv
 
 import (
 	"bytes"
-	json_ "encoding/json"
+	"encoding/json"
 	"errors"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type CmdType int
 
@@ -33,7 +31,7 @@ type BaseKey struct {
 // 获取数据类型
 func GetCmdType(b []byte) CmdType {
 	var bk BaseKey
-	if err := json.Unmarshal(b, &bk); err != nil {
+	if err := jsoniter.Unmarshal(b, &bk); err != nil {
 		return ErrorType
 	}
 
@@ -60,10 +58,10 @@ func GetCmdType(b []byte) CmdType {
 type roomRealTimeMessageUpdate struct {
 	Cmd  string `json:"cmd"`
 	Data struct {
-		RoomId    json_.Number `json:"roomid"`
-		Fans      json_.Number `json:"fans"`
-		RedNotice json_.Number `json:"red_notice"`
-		FansClub  json_.Number `json:"fans_club"`
+		RoomId    json.Number `json:"roomid"`
+		Fans      json.Number `json:"fans"`
+		RedNotice json.Number `json:"red_notice"`
+		FansClub  json.Number `json:"fans_club"`
 	} `json:"data"`
 }
 type RoomRealTimeMessageUpdateStruct struct {
@@ -97,7 +95,7 @@ Label:
 type stopLiveRoomList struct {
 	Cmd  string `json:"cmd"`
 	Data struct {
-		RoomIdList []json_.Number `json:"room_id_list"`
+		RoomIdList []json.Number `json:"room_id_list"`
 	} `json:"data"`
 }
 
@@ -130,7 +128,7 @@ Label:
 type onlineRankCount struct {
 	Cmd  string `json:"cmd"`
 	Data struct {
-		Count json_.Number `json:"count"`
+		Count json.Number `json:"count"`
 	} `json:"data"`
 }
 type OnlineRankCountStruct struct {
@@ -178,7 +176,7 @@ func InteractWord(b []byte) (InteractWordStruct, error) {
 	var iwS InteractWordStruct
 	var globalErr error
 
-	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder := jsoniter.NewDecoder(bytes.NewReader(b))
 	decoder.UseNumber()
 
 	if globalErr = decoder.Decode(&iw); globalErr != nil {
@@ -201,7 +199,7 @@ func InteractWord(b []byte) (InteractWordStruct, error) {
 			goto Label
 		} else {
 			switch ta := s.(type) {
-			case json_.Number:
+			case json.Number:
 				*k.Value = ta.String()
 			case string:
 				*k.Value = ta
@@ -241,7 +239,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 	var dmmt DanMuMsgStruct
 	var globalErr error
 
-	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder := jsoniter.NewDecoder(bytes.NewReader(b))
 	decoder.UseNumber()
 
 	if globalErr = decoder.Decode(&dmm); globalErr != nil {
@@ -251,7 +249,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 
 	if v1, ok := dmm.Info[0].([]interface{}); ok {
 		// FontSize
-		if jn, ok := v1[2].(json_.Number); ok {
+		if jn, ok := v1[2].(json.Number); ok {
 			dmmt.FontSize = jn.String()
 		} else {
 			globalErr = errors.New("DanMuMsg get FontSize fail")
@@ -259,7 +257,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 		}
 
 		// Color
-		if jn, ok := v1[3].(json_.Number); ok {
+		if jn, ok := v1[3].(json.Number); ok {
 			dmmt.Color = jn.String()
 		} else {
 			globalErr = errors.New("DanMuMsg get Color fail")
@@ -267,7 +265,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 		}
 
 		// UnixMs
-		if jn, ok := v1[4].(json_.Number); ok {
+		if jn, ok := v1[4].(json.Number); ok {
 			dmmt.UnixMs = jn.String()
 		} else {
 			globalErr = errors.New("DanMuMsg get UnixMs fail")
@@ -298,7 +296,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 
 	if v1, ok := dmm.Info[2].([]interface{}); ok {
 		// UId
-		if jn, ok := v1[0].(json_.Number); ok {
+		if jn, ok := v1[0].(json.Number); ok {
 			dmmt.UId = jn.String()
 		} else {
 			globalErr = errors.New("DanMuMsg get UId fail")
@@ -329,7 +327,7 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 
 		// UnixS
 		if us, ok := v1["ts"]; ok {
-			if jn, ok := us.(json_.Number); ok {
+			if jn, ok := us.(json.Number); ok {
 				dmmt.UnixS = jn.String()
 			} else {
 				globalErr = errors.New("DanMuMsg UnixS type assertion fail")
