@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -73,39 +72,37 @@ func GetRoomInfo(id string) (string, error) {
 	}(resp.Body)
 
 	var jsonData struct {
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
+		Code jsoniter.Number `json:"code"`
+		Msg  string          `json:"msg"`
 		Data struct {
-			RoomId      uint64 `json:"room_id"`
-			ShortId     uint64 `json:"short_id"`
-			UId         uint64 `json:"uid"`
-			NeedP2p     int    `json:"need_p2p"`
-			IsHidden    bool   `json:"is_hidden"`
-			IsLocked    bool   `json:"is_locked"`
-			IsPortrait  bool   `json:"is_portrait"`
-			LiveStatus  int    `json:"live_status"`
-			HiddenTill  int    `json:"hidden_till"`
-			LockTill    int    `json:"lock_till"`
-			Encrypted   bool   `json:"encrypted"`
-			PwdVerified bool   `json:"pwd_verified"`
-			LiveTime    uint64 `json:"live_time"`
-			RoomShield  int    `json:"room_shield"`
-			IsSp        int    `json:"is_sp"`
-			SpecialType int    `json:"special_type"`
+			RoomId      jsoniter.Number `json:"room_id"`
+			ShortId     jsoniter.Number `json:"short_id"`
+			UId         jsoniter.Number `json:"uid"`
+			NeedP2p     jsoniter.Number `json:"need_p2p"`
+			IsHidden    bool            `json:"is_hidden"`
+			IsLocked    bool            `json:"is_locked"`
+			IsPortrait  bool            `json:"is_portrait"`
+			LiveStatus  jsoniter.Number `json:"live_status"`
+			HiddenTill  jsoniter.Number `json:"hidden_till"`
+			LockTill    jsoniter.Number `json:"lock_till"`
+			Encrypted   bool            `json:"encrypted"`
+			PwdVerified bool            `json:"pwd_verified"`
+			LiveTime    jsoniter.Number `json:"live_time"`
+			RoomShield  jsoniter.Number `json:"room_shield"`
+			IsSp        jsoniter.Number `json:"is_sp"`
+			SpecialType jsoniter.Number `json:"special_type"`
 		} `json:"data"`
 	}
 
-	b, err := io.ReadAll(resp.Body)
+	decoder := jsoniter.NewDecoder(resp.Body)
+	decoder.UseNumber()
+
+	err = decoder.Decode(&jsonData)
 	if err != nil {
 		return "", err
 	}
 
-	err = json.Unmarshal(b, &jsonData)
-	if err != nil {
-		return "", err
-	}
-
-	return strconv.FormatUint(jsonData.Data.RoomId, 10), nil
+	return jsonData.Data.RoomId.String(), nil
 }
 
 // GetDanmuInfo
