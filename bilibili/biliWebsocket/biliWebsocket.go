@@ -76,7 +76,15 @@ func (blw *BiliWebsocket) send() {
 
 	for {
 		select {
-		case blw.wspSendCh <- <-*blw.sendCh:
+		case b, ok := <-*blw.sendCh:
+			if !ok {
+				return
+			}
+			select {
+			case blw.wspSendCh <- b:
+			case <-blw.WebsocketP.IsClosedCh:
+				return
+			}
 			blw.timeoutTicker.Reset(time.Second * 30)
 		case <-blw.WebsocketP.IsClosedCh:
 			return
