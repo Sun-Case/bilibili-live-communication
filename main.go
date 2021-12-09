@@ -111,6 +111,12 @@ func main() {
 				} else {
 					log.Println(err)
 				}
+			case biliJsonConv.HotRankChangedV2Type:
+				if b, err := biliJsonConv.HotRankChangedV2(b); err == nil {
+					log.Printf("%s排行榜 刷新: %s 之 %s\n", b.AreaName, b.RankDesc, b.Rank)
+				} else {
+					log.Println(err)
+				}
 			case biliJsonConv.ErrorType:
 				log.Println("Error Type:", string(b))
 			case biliJsonConv.UnknownType:
