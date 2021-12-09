@@ -101,6 +101,16 @@ func main() {
 				} else {
 					log.Println(err)
 				}
+			case biliJsonConv.OnlineRankV2Type:
+				if b, err := biliJsonConv.OnlineRankV2(b); err == nil {
+					log.Println("高能榜: ")
+					for i := range b.Rank {
+						fmt.Printf("%s. %s    ", b.Rank[i].Rank, b.Rank[i].UName)
+					}
+					fmt.Println("")
+				} else {
+					log.Println(err)
+				}
 			case biliJsonConv.ErrorType:
 				log.Println("Error Type:", string(b))
 			case biliJsonConv.UnknownType:

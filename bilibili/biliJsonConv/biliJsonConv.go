@@ -17,6 +17,7 @@ const (
 	OnlineRankCountType
 	StopLiveRoomListType
 	RoomRealTimeMessageUpdateType
+	OnlineRankV2Type
 
 	UnknownType
 	ErrorType
@@ -50,6 +51,8 @@ func GetCmdType(b []byte) CmdType {
 		return StopLiveRoomListType
 	case "ROOM_REAL_TIME_MESSAGE_UPDATE":
 		return RoomRealTimeMessageUpdateType
+	case "ONLINE_RANK_V2":
+		return OnlineRankV2Type
 	default:
 		return UnknownType
 	}
