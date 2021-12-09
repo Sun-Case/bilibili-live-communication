@@ -117,6 +117,12 @@ func main() {
 				} else {
 					log.Println(err)
 				}
+			case biliJsonConv.PreparingType:
+				if b, err := biliJsonConv.Preparing(b); err == nil {
+					log.Printf("直播间: %s 下播\n", b.RoomId)
+				} else {
+					log.Println(err)
+				}
 			case biliJsonConv.ErrorType:
 				log.Println("Error Type:", string(b))
 			case biliJsonConv.UnknownType:

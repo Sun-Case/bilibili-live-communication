@@ -19,6 +19,7 @@ const (
 	RoomRealTimeMessageUpdateType
 	OnlineRankV2Type
 	HotRankChangedV2Type
+	PreparingType
 
 	UnknownType
 	ErrorType
@@ -56,6 +57,8 @@ func GetCmdType(b []byte) CmdType {
 		return OnlineRankV2Type
 	case "HOT_RANK_CHANGED_V2":
 		return HotRankChangedV2Type
+	case "PREPARING":
+		return PreparingType
 	default:
 		return UnknownType
 	}
