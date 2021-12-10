@@ -21,14 +21,15 @@ const (
 	HotRankChangedV2Type
 	PreparingType
 	SendGiftType
+	EntryEffectType
 
 	UnknownType
 	ErrorType
 )
 
 type BaseKey struct {
-	Code int    `json:"code"`
-	Cmd  string `json:"cmd"`
+	Code jsoniter.Number `json:"code"`
+	Cmd  string          `json:"cmd"`
 }
 
 // GetCmdType
@@ -62,6 +63,8 @@ func GetCmdType(b []byte) CmdType {
 		return PreparingType
 	case "SEND_GIFT":
 		return SendGiftType
+	case "ENTRY_EFFECT":
+		return EntryEffectType
 	default:
 		return UnknownType
 	}

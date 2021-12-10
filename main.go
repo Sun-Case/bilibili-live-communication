@@ -24,7 +24,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.OnlineRankV2Type:              false,
 	biliJsonConv.HotRankChangedV2Type:          false,
 	biliJsonConv.PreparingType:                 false,
-	biliJsonConv.SendGiftType:                  true,
+	biliJsonConv.SendGiftType:                  false,
+	biliJsonConv.EntryEffectType:               true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -156,6 +157,14 @@ func main() {
 				if b, err := biliJsonConv.SendGift(b); err == nil {
 					if show[biliJsonConv.SendGiftType] {
 						log.Println(b.Uname, b.Action, b.GiftName)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.EntryEffectType:
+				if b, err := biliJsonConv.EntryEffect(b); err == nil {
+					if show[biliJsonConv.EntryEffectType] {
+						log.Println(b.CopyWritingV2)
 					}
 				} else {
 					log.Println(err)
