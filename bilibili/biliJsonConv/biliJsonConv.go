@@ -20,6 +20,7 @@ const (
 	OnlineRankV2Type
 	HotRankChangedV2Type
 	PreparingType
+	SendGiftType
 
 	UnknownType
 	ErrorType
@@ -59,6 +60,8 @@ func GetCmdType(b []byte) CmdType {
 		return HotRankChangedV2Type
 	case "PREPARING":
 		return PreparingType
+	case "SEND_GIFT":
+		return SendGiftType
 	default:
 		return UnknownType
 	}

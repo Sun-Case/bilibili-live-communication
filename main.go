@@ -15,6 +15,19 @@ import (
 )
 
 var KV map[string]string
+var show = map[biliJsonConv.CmdType]bool{
+	biliJsonConv.DanMuMsgType:                  false,
+	biliJsonConv.InteractWordType:              false,
+	biliJsonConv.OnlineRankCountType:           false,
+	biliJsonConv.StopLiveRoomListType:          false,
+	biliJsonConv.RoomRealTimeMessageUpdateType: false,
+	biliJsonConv.OnlineRankV2Type:              false,
+	biliJsonConv.HotRankChangedV2Type:          false,
+	biliJsonConv.PreparingType:                 false,
+	biliJsonConv.SendGiftType:                  true,
+	biliJsonConv.ErrorType:                     true,
+	biliJsonConv.UnknownType:                   true,
+}
 
 func main() {
 	fb, _ := os.ReadFile("config.json")
@@ -75,51 +88,75 @@ func main() {
 			switch biliJsonConv.GetCmdType(b) {
 			case biliJsonConv.DanMuMsgType:
 				if b, err := biliJsonConv.DanMuMsg(b); err == nil {
-					log.Printf("%s: %s", b.Name, b.Msg)
+					if show[biliJsonConv.DanMuMsgType] {
+						log.Printf("%s: %s", b.Name, b.Msg)
+					}
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.InteractWordType:
 				if b, err := biliJsonConv.InteractWord(b); err == nil {
-					log.Println(b.UName, "进入直播间")
+					if show[biliJsonConv.InteractWordType] {
+						log.Println(b.UName, "进入直播间")
+					}
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.OnlineRankCountType:
 				if b, err := biliJsonConv.OnlineRankCount(b); err == nil {
-					log.Println("在线排名统计:", b.Count)
+					if show[biliJsonConv.OnlineRankCountType] {
+						log.Println("在线排名统计:", b.Count)
+					}
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.StopLiveRoomListType:
 				if b, err := biliJsonConv.StopLiveRoomList(b); err == nil {
-					log.Println("下播直播间ID:", b.RoomIdList)
+					if show[biliJsonConv.StopLiveRoomListType] {
+						log.Println("下播直播间ID:", b.RoomIdList)
+					}
 				}
 			case biliJsonConv.RoomRealTimeMessageUpdateType:
 				if b, err := biliJsonConv.RoomRealTimeMessageUpdate(b); err == nil {
-					log.Printf("直播间: %s, 粉丝数: %s, 粉丝团数: %s\n", b.RoomId, b.Fans, b.FansClub)
+					if show[biliJsonConv.RoomRealTimeMessageUpdateType] {
+						log.Printf("直播间: %s, 粉丝数: %s, 粉丝团数: %s\n", b.RoomId, b.Fans, b.FansClub)
+					}
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.OnlineRankV2Type:
 				if b, err := biliJsonConv.OnlineRankV2(b); err == nil {
-					log.Println("高能榜: ")
-					for i := range b.Rank {
-						fmt.Printf("%s. %s    ", b.Rank[i].Rank, b.Rank[i].UName)
+					if show[biliJsonConv.OnlineRankV2Type] {
+						log.Println("高能榜: ")
+						for i := range b.Rank {
+							fmt.Printf("%s. %s    ", b.Rank[i].Rank, b.Rank[i].UName)
+						}
+						fmt.Println("")
 					}
-					fmt.Println("")
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.HotRankChangedV2Type:
 				if b, err := biliJsonConv.HotRankChangedV2(b); err == nil {
-					log.Printf("%s排行榜 刷新: %s 之 %s\n", b.AreaName, b.RankDesc, b.Rank)
+					if show[biliJsonConv.HotRankChangedV2Type] {
+						log.Printf("%s排行榜 刷新: %s 之 %s\n", b.AreaName, b.RankDesc, b.Rank)
+					}
 				} else {
 					log.Println(err)
 				}
 			case biliJsonConv.PreparingType:
 				if b, err := biliJsonConv.Preparing(b); err == nil {
-					log.Printf("直播间: %s 下播\n", b.RoomId)
+					if show[biliJsonConv.PreparingType] {
+						log.Printf("直播间: %s 下播\n", b.RoomId)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.SendGiftType:
+				if b, err := biliJsonConv.SendGift(b); err == nil {
+					if show[biliJsonConv.SendGiftType] {
+						log.Println(b.Uname, b.Action, b.GiftName)
+					}
 				} else {
 					log.Println(err)
 				}
