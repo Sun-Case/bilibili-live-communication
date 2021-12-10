@@ -25,7 +25,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.HotRankChangedV2Type:          false,
 	biliJsonConv.PreparingType:                 false,
 	biliJsonConv.SendGiftType:                  false,
-	biliJsonConv.EntryEffectType:               true,
+	biliJsonConv.EntryEffectType:               false,
+	biliJsonConv.LiveInteractiveGameType:       true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -165,6 +166,14 @@ func main() {
 				if b, err := biliJsonConv.EntryEffect(b); err == nil {
 					if show[biliJsonConv.EntryEffectType] {
 						log.Println(b.CopyWritingV2)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.LiveInteractiveGameType:
+				if b, err := biliJsonConv.LiveInteractiveGame(b); err == nil {
+					if show[biliJsonConv.LiveInteractiveGameType] {
+						log.Println(b.Uname, "喂投", b.GiftName, "共", b.GiftNum, "个")
 					}
 				} else {
 					log.Println(err)

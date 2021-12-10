@@ -22,6 +22,7 @@ const (
 	PreparingType
 	SendGiftType
 	EntryEffectType
+	LiveInteractiveGameType
 
 	UnknownType
 	ErrorType
@@ -65,6 +66,8 @@ func GetCmdType(b []byte) CmdType {
 		return SendGiftType
 	case "ENTRY_EFFECT":
 		return EntryEffectType
+	case "LIVE_INTERACTIVE_GAME":
+		return LiveInteractiveGameType
 	default:
 		return UnknownType
 	}
