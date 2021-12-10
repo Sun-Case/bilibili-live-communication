@@ -74,6 +74,8 @@ func NoticeMsg(b []byte) (NoticeMsgStruct, error) {
 		goto Label
 	}
 
+	nms.RawData = nm
+
 	nms.Name = nm.Name
 	nms.RoomId = nm.Roomid.String()
 	nms.RealRoomId = nm.RealRoomid.String()

@@ -68,6 +68,8 @@ func ComboSend(b []byte) (ComboSendStruct, error) {
 		goto Label
 	}
 
+	css.RawData = cs
+
 	css.Action = cs.Data.Action
 	css.BatchComboNum = cs.Data.BatchComboNum.String()
 	css.ComboNum = cs.Data.ComboNum.String()
