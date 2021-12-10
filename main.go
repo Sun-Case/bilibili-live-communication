@@ -28,7 +28,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.EntryEffectType:               false,
 	biliJsonConv.LiveInteractiveGameType:       false,
 	biliJsonConv.ComboSendType:                 false,
-	biliJsonConv.NoticeMsgType:                 true,
+	biliJsonConv.NoticeMsgType:                 false,
+	biliJsonConv.OnlineRankTop3Type:            true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -192,6 +193,16 @@ func main() {
 				if b, err := biliJsonConv.NoticeMsg(b); err == nil {
 					if show[biliJsonConv.NoticeMsgType] {
 						log.Println(b.MsgCommon)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.OnlineRankTop3Type:
+				if b, err := biliJsonConv.OnlineRankTop3(b); err == nil {
+					if show[biliJsonConv.OnlineRankTop3Type] {
+						for i := range b.List {
+							log.Println(b.List[i].Msg, "第", b.List[i].Rank)
+						}
 					}
 				} else {
 					log.Println(err)

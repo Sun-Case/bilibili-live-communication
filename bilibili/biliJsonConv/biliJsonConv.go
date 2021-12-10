@@ -25,6 +25,7 @@ const (
 	LiveInteractiveGameType
 	ComboSendType
 	NoticeMsgType
+	OnlineRankTop3Type
 
 	UnknownType
 	ErrorType
@@ -74,6 +75,8 @@ func GetCmdType(b []byte) CmdType {
 		return ComboSendType
 	case "NOTICE_MSG":
 		return NoticeMsgType
+	case "ONLINE_RANK_TOP3":
+		return OnlineRankTop3Type
 	default:
 		return UnknownType
 	}
