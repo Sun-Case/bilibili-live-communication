@@ -27,7 +27,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.SendGiftType:                  false,
 	biliJsonConv.EntryEffectType:               false,
 	biliJsonConv.LiveInteractiveGameType:       false,
-	biliJsonConv.ComboSendType:                 true,
+	biliJsonConv.ComboSendType:                 false,
+	biliJsonConv.NoticeMsgType:                 true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -183,6 +184,14 @@ func main() {
 				if b, err := biliJsonConv.ComboSend(b); err == nil {
 					if show[biliJsonConv.ComboSendType] {
 						log.Println(b.Uname, b.Action, b.GiftName, "共", b.ComboNum, "个")
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.NoticeMsgType:
+				if b, err := biliJsonConv.NoticeMsg(b); err == nil {
+					if show[biliJsonConv.NoticeMsgType] {
+						log.Println(b.MsgCommon)
 					}
 				} else {
 					log.Println(err)

@@ -24,6 +24,7 @@ const (
 	EntryEffectType
 	LiveInteractiveGameType
 	ComboSendType
+	NoticeMsgType
 
 	UnknownType
 	ErrorType
@@ -71,6 +72,8 @@ func GetCmdType(b []byte) CmdType {
 		return LiveInteractiveGameType
 	case "COMBO_SEND":
 		return ComboSendType
+	case "NOTICE_MSG":
+		return NoticeMsgType
 	default:
 		return UnknownType
 	}
