@@ -26,6 +26,7 @@ const (
 	ComboSendType
 	NoticeMsgType
 	OnlineRankTop3Type
+	LiveType
 
 	UnknownType
 	ErrorType
@@ -77,6 +78,8 @@ func GetCmdType(b []byte) CmdType {
 		return NoticeMsgType
 	case "ONLINE_RANK_TOP3":
 		return OnlineRankTop3Type
+	case "LIVE":
+		return LiveType
 	default:
 		return UnknownType
 	}

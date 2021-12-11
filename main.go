@@ -29,7 +29,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.LiveInteractiveGameType:       false,
 	biliJsonConv.ComboSendType:                 false,
 	biliJsonConv.NoticeMsgType:                 false,
-	biliJsonConv.OnlineRankTop3Type:            true,
+	biliJsonConv.OnlineRankTop3Type:            false,
+	biliJsonConv.LiveType:                      true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -203,6 +204,14 @@ func main() {
 						for i := range b.List {
 							log.Println(b.List[i].Msg, "第", b.List[i].Rank)
 						}
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.LiveType:
+				if b, err := biliJsonConv.Live(b); err == nil {
+					if show[biliJsonConv.LiveType] {
+						log.Println(b.RoomId, "开播", "设备:", b.LivePlatform)
 					}
 				} else {
 					log.Println(err)
