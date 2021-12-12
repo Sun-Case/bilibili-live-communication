@@ -28,6 +28,7 @@ const (
 	OnlineRankTop3Type
 	LiveType
 	RoomChangeType
+	WidgetBannerType
 
 	UnknownType
 	ErrorType
@@ -83,6 +84,8 @@ func GetCmdType(b []byte) CmdType {
 		return LiveType
 	case "ROOM_CHANGE":
 		return RoomChangeType
+	case "WIDGET_BANNER":
+		return WidgetBannerType
 	default:
 		return UnknownType
 	}
