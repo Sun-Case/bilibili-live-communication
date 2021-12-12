@@ -32,7 +32,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.OnlineRankTop3Type:            false,
 	biliJsonConv.LiveType:                      false,
 	biliJsonConv.RoomChangeType:                false,
-	biliJsonConv.WidgetBannerType:              true,
+	biliJsonConv.WidgetBannerType:              false,
+	biliJsonConv.GuardBuyType:                  true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -230,6 +231,14 @@ func main() {
 				if b, err := biliJsonConv.WidgetBanner(b); err == nil {
 					if show[biliJsonConv.WidgetBannerType] {
 						log.Println(b)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.GuardBuyType:
+				if b, err := biliJsonConv.GuardBuy(b); err == nil {
+					if show[biliJsonConv.GuardBuyType] {
+						log.Println(b.Username, b.GiftName, b.Num)
 					}
 				} else {
 					log.Println(err)

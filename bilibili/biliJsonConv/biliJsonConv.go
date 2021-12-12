@@ -29,6 +29,7 @@ const (
 	LiveType
 	RoomChangeType
 	WidgetBannerType
+	GuardBuyType
 
 	UnknownType
 	ErrorType
@@ -86,6 +87,8 @@ func GetCmdType(b []byte) CmdType {
 		return RoomChangeType
 	case "WIDGET_BANNER":
 		return WidgetBannerType
+	case "GUARD_BUY":
+		return GuardBuyType
 	default:
 		return UnknownType
 	}
