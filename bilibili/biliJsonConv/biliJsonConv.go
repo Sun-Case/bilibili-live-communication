@@ -27,6 +27,7 @@ const (
 	NoticeMsgType
 	OnlineRankTop3Type
 	LiveType
+	RoomChangeType
 
 	UnknownType
 	ErrorType
@@ -80,6 +81,8 @@ func GetCmdType(b []byte) CmdType {
 		return OnlineRankTop3Type
 	case "LIVE":
 		return LiveType
+	case "ROOM_CHANGE":
+		return RoomChangeType
 	default:
 		return UnknownType
 	}

@@ -30,7 +30,8 @@ var show = map[biliJsonConv.CmdType]bool{
 	biliJsonConv.ComboSendType:                 false,
 	biliJsonConv.NoticeMsgType:                 false,
 	biliJsonConv.OnlineRankTop3Type:            false,
-	biliJsonConv.LiveType:                      true,
+	biliJsonConv.LiveType:                      false,
+	biliJsonConv.RoomChangeType:                true,
 	biliJsonConv.ErrorType:                     true,
 	biliJsonConv.UnknownType:                   true,
 }
@@ -212,6 +213,14 @@ func main() {
 				if b, err := biliJsonConv.Live(b); err == nil {
 					if show[biliJsonConv.LiveType] {
 						log.Println(b.RoomId, "开播", "设备:", b.LivePlatform)
+					}
+				} else {
+					log.Println(err)
+				}
+			case biliJsonConv.RoomChangeType:
+				if b, err := biliJsonConv.RoomChange(b); err == nil {
+					if show[biliJsonConv.RoomChangeType] {
+						log.Println("直播间:", b.Title, ", 总分区:", b.ParentAreaName, "子分区:", b.AreaName)
 					}
 				} else {
 					log.Println(err)
