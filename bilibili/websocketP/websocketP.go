@@ -28,21 +28,21 @@ type WebSocketP struct {
 	// needClose通道，通知相关协程退出
 	needCloseCh chan struct{}
 
-	// 只执行一侧 stop函数
+	// 只执行一次 stop函数
 	once sync.Once
 }
 
-// stop
-// 停止
-func (wsp *WebSocketP) stop() {
-	go wsp.__stop__()
-}
-
+// Stop
+// 停止, 可执行多次
 func (wsp *WebSocketP) Stop() {
-	wsp.once.Do(wsp.stop)
+	wsp.once.Do(func() {
+		go wsp.stop()
+	})
 }
 
-func (wsp *WebSocketP) __stop__() {
+// stop
+// 停止函数，只能执行一次，否则会 panic
+func (wsp *WebSocketP) stop() {
 	if debug {
 		log.Println("websocketP StopFunc: Running")
 		defer func() {
@@ -104,7 +104,7 @@ func (wsp *WebSocketP) receiveFunc() {
 
 	defer func() {
 		wsp.wg.Done()
-		wsp.once.Do(wsp.stop)
+		wsp.Stop()
 	}()
 	defer func() {
 		if err := recover(); err != nil {
@@ -138,7 +138,7 @@ func (wsp *WebSocketP) sendFunc() {
 	}
 	defer func() {
 		wsp.wg.Done()
-		wsp.once.Do(wsp.stop)
+		wsp.Stop()
 	}()
 
 	for {
