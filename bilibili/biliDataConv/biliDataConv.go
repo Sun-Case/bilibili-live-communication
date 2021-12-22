@@ -12,6 +12,14 @@ import (
 	"unsafe"
 )
 
+/*!
+注意使用了 unsafe.Sizeof(BaseHeader{})
+这是一个坑，只是现在没问题
+如果成员发生改变，可能会因对齐原因，大小有偏差导致数据处理错误
+*/
+
+const debug = false
+
 type BaseHeader struct {
 	PackLen    uint32
 	HeaderSize uint16
@@ -114,7 +122,9 @@ func Decode(b []byte) ([]BiliConvStruct, error) {
 		fallthrough
 	case 1:
 		if bh.Operation == 3 { // 心跳包回复
-			log.Println("Heartbeat Receive")
+			if debug {
+				log.Println("Heartbeat Receive")
+			}
 			goto Label
 		}
 
