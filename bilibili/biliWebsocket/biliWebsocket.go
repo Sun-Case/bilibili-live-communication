@@ -193,7 +193,6 @@ func (blw *BiliWebsocket) timeout() {
 		}()
 	}
 
-	blw.timeoutTicker = time.NewTicker(time.Second * 30)
 	defer blw.timeoutTicker.Stop()
 
 	select {
@@ -217,6 +216,7 @@ func New(conn *websocket.Conn, receiveChannel *chan []byte, sendChannel *chan bi
 	blw.wspSendCh = make(chan []byte)
 	blw.wspReceiveCh = make(chan []byte)
 	blw.IsClosedCh = make(chan struct{})
+	blw.timeoutTicker = time.NewTicker(time.Second * 30)
 
 	blw.WebsocketP = websocketP.New(conn, &blw.wspReceiveCh, &blw.wspSendCh)
 
