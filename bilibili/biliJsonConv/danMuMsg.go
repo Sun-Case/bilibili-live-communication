@@ -18,14 +18,17 @@ type danMuMsg struct {
 type DanMuMsgStruct struct {
 	RawData danMuMsg
 
-	FontSize string // 字号
-	UnixMs   string // 时间戳: 毫秒
-	UnixS    string // 时间戳: 秒
-	Color    string // 弹幕颜色
-	Msg      string // 弹幕内容
-	Name     string // 用户名
-	UId      string // 用户ID
-	CT       string
+	FontSize   string // 字号
+	UnixMs     string // 时间戳: 毫秒
+	UnixS      string // 时间戳: 秒
+	Color      string // 弹幕颜色
+	Msg        string // 弹幕内容
+	Name       string // 用户名
+	UId        string // 用户ID
+	CT         string
+	Brand      string // 牌子
+	BrandLevel string // 牌子等级
+	ShowBrand  bool   // 显示牌子
 }
 
 func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
@@ -104,6 +107,33 @@ func DanMuMsg(b []byte) (DanMuMsgStruct, error) {
 		}
 	} else {
 		globalErr = errors.New("DanMuMsg.Info[2] type assertion fail")
+		goto Label
+	}
+
+	// 牌子
+	if v1, ok := dmm.Info[3].([]interface{}); ok && len(v1) != 0 {
+		// BrandLevel
+		if bl, ok := v1[0].(json.Number); ok {
+			dmmt.BrandLevel = bl.String()
+		} else {
+			globalErr = errors.New("DanMuMsg get BrandLevel fail")
+			goto Label
+		}
+		// Brand
+		if dmmt.Brand, ok = v1[1].(string); !ok {
+			globalErr = errors.New("DanMuMsg get Brand fail")
+			goto Label
+		}
+		// ShowBrand
+		if sb, ok := v1[11].(json.Number); ok {
+			if sb.String() == "1" {
+				dmmt.ShowBrand = true
+			} else {
+				dmmt.ShowBrand = false
+			}
+		}
+	} else if !ok {
+		globalErr = errors.New("DanMuMsg.Info[3] type assertion fail")
 		goto Label
 	}
 

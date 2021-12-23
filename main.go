@@ -93,7 +93,11 @@ func main() {
 			case biliJsonConv.DanMuMsgType:
 				if b, err := biliJsonConv.DanMuMsg(b); err == nil {
 					if show[biliJsonConv.DanMuMsgType] {
-						log.Printf("%s: %s", b.Name, b.Msg)
+						if b.ShowBrand {
+							log.Printf("[%s(%s)] %s: %s", b.Brand, b.BrandLevel, b.Name, b.Msg)
+						} else {
+							log.Printf("%s: %s", b.Name, b.Msg)
+						}
 					}
 				} else {
 					log.Println(err)
