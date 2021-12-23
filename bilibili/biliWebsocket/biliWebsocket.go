@@ -9,13 +9,32 @@ import (
 	"time"
 )
 
+/*!
+
+biliWebsocket 底层使用 websocketP
+	负责维持心跳处理, 超时处理, 原始二进制解码, JSON编码成二进制
+
+BiliWebsocket.sendCh: 接收外部的数据（结构体），将数据编码成二进制，传到 BiliWebsocket.wbpSendCh
+	该通道由外部设置, BiliWebsocket.Stop 不负责关闭
+BiliWebsocket.receiveCh: 将 JSON数据(由 BiliWebsocket.wspReceiveCh通道 获取并解码而来) 传输到该通道
+	该通道由外部设置, BiliWebsocket.Stop 不负责关闭
+
+BiliWebsocket.wspSendCh: 将 二进制数据(由 BiliWebsocket.wbpSendCh通道 获取并编码而来) 传到该通道, 交由 WebsocketP 处理
+	该通道由 BiliWebsocket.New 创建, 由 BiliWebsocket.Stop 关闭
+BiliWebsocket.wspReceiveCh: 读取该通道的原始二进制数据, 将原始二进制数据解码成 JSON 数据, 传到 BiliWebsocket.receiveCh
+	该通道由 BiliWebsocket.New 创建, 由 BiliWebsocket.Stop 关闭
+
+BiliWebsocket.IsClosedCh: 外部通过该通道判断 websocket、相关协程是否结束
+	该通道由 BiliWebsocket.Net 创建, 由 BiliWebsocket.Stop 关闭
+*/
+
 const debug = true
 
 type BiliWebsocket struct {
 	WebsocketP *websocketP.WebSocketP
 
 	// User 与 BiliWebsocket 通信
-	sendCh     *chan []byte
+	sendCh     *chan biliDataConv.EncodeArgs
 	receiveCh  *chan []byte
 	IsClosedCh chan struct{}
 
@@ -80,8 +99,12 @@ func (blw *BiliWebsocket) send() {
 			if !ok {
 				return
 			}
+			bin, err := biliDataConv.Encode(b.Version, b.Operation, b.Sequence, b.Body)
+			if err != nil {
+				return
+			}
 			select {
-			case blw.wspSendCh <- b:
+			case blw.wspSendCh <- bin:
 			case <-blw.WebsocketP.IsClosedCh:
 				return
 			}
@@ -179,7 +202,7 @@ func (blw *BiliWebsocket) timeout() {
 	}
 }
 
-func New(conn *websocket.Conn, receiveChannel, sendChannel *chan []byte, onOpen func(blw *BiliWebsocket) []byte) *BiliWebsocket {
+func New(conn *websocket.Conn, receiveChannel *chan []byte, sendChannel *chan biliDataConv.EncodeArgs, onOpen func(blw *BiliWebsocket) biliDataConv.EncodeArgs) *BiliWebsocket {
 	if debug {
 		log.Println("biliWebSocket NewFunc: Running")
 		defer func() {
@@ -199,7 +222,7 @@ func New(conn *websocket.Conn, receiveChannel, sendChannel *chan []byte, onOpen 
 
 	go func() {
 		select {
-		case blw.wspSendCh <- onOpen(blw):
+		case *blw.sendCh <- onOpen(blw):
 			blw.wg.Add(2)
 			// 心跳包
 			go blw.heartbeat()

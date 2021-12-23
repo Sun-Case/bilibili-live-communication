@@ -8,6 +8,16 @@ import (
 
 /*
 对 websocket 进行封装，以适用 Bilibili Live Websocket 通信
+
+WebsocketP.sendCh: 从该通道获取外部传输进来的二进制数据, 该通道由外部设置, WebsocketP.Stop 不负责关闭
+	传输的数据为已编码的二进制数据
+
+WebsocketP.receiveCh: 将弹幕服务器的二进制数据传输到该通道, 该通道由外部设置, WebsocketP.Stop 不负责关闭
+	传输的数据为已编码压缩的二进制数据，也可能是多个子二进制数据拼接后再编码压缩而生成的二进制数据
+
+WebsocketP.IsClosedCh: 外部判断 websocket 是否断开、协程是否全部关闭
+	在 websocket 断开后, 调用 WebsocketP.Stop 关闭相关协程, 全部协程关闭后, 再关闭 WebsocketP.IsClosedCh
+
 */
 
 const debug = true

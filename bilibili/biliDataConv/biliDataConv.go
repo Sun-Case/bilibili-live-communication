@@ -13,6 +13,13 @@ import (
 )
 
 /*!
+Encode:
+	将 JSON数据 编码成 二进制数据
+Decode:
+	将 原始二进制数据 解码成多个 JSON数据（特殊情况可能是其他数据类型）
+*/
+
+/*!
 注意使用了 unsafe.Sizeof(BaseHeader{})
 这是一个坑，只是现在没问题
 如果成员发生改变，可能会因对齐原因，大小有偏差导致数据处理错误
@@ -35,51 +42,12 @@ type BiliConvStruct struct {
 	//Bin []uint8
 }
 
-//func (cs *BiliConvStruct) Decode(buf *bytes.Reader) error {
-//	var err error
-//
-//	if err = binary.Read(buf, binary.BigEndian, &cs.Header); err == nil {
-//
-//		if int(cs.Header.PackLen) == int(cs.Header.HeaderSize)+buf.Len() {
-//
-//			cs.Body = make([]uint8, cs.Header.PackLen-uint32(cs.Header.HeaderSize))
-//
-//			err = binary.Read(buf, binary.BigEndian, &cs.Body)
-//
-//		} else {
-//			err = errors.New(fmt.Sprintf("PackLen: %d, RawHanderSize: %d, BufLen: %d\n", cs.Header.PackLen, cs.Header.HeaderSize, buf.Len()))
-//		}
-//
-//	}
-//
-//	return err
-//}
-//
-//func (cs *BiliConvStruct) Encode(ver uint16, operation uint32, seqId uint32, body []uint8) error {
-//	cs.Header = struct {
-//		PackLen    uint32
-//		HeaderSize uint16
-//		Version    uint16
-//		Operation  uint32
-//		Sequence   uint32
-//	}{PackLen: 16 + uint32(len(body)), HeaderSize: 16, Version: ver, Operation: operation, Sequence: seqId}
-//	cs.Body = body
-//
-//	var buf bytes.Buffer
-//	var err error
-//
-//	if err = binary.Write(&buf, binary.BigEndian, &cs.Header); err == nil {
-//
-//		if err = binary.Write(&buf, binary.BigEndian, &cs.Body); err == nil {
-//
-//			cs.Bin = buf.Bytes()
-//
-//		}
-//
-//	}
-//
-//	return err
-//}
+type EncodeArgs struct {
+	Version   uint16
+	Operation uint32
+	Sequence  uint32
+	Body      []uint8
+}
 
 func Encode(ver uint16, operation uint32, sequence uint32, body []uint8) ([]byte, error) {
 	bh := BaseHeader{

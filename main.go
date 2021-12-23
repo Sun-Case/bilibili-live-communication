@@ -71,19 +71,14 @@ func main() {
 		}
 	}(c)
 
-	sendCannel := make(chan []byte)
+	sendCannel := make(chan biliDataConv.EncodeArgs)
 	receiveChannel := make(chan []byte)
-	blw := biliWebsocket.New(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliWebsocket) []byte {
-		var b []byte
-		var err error
-
+	blw := biliWebsocket.New(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliWebsocket) biliDataConv.EncodeArgs {
 		// 注意，如果获取弹幕地址及Token时，没有携带账号的Cookie，则下面的uid必须为0，否则鉴权失败，直接断开连接
 		data := fmt.Sprintf("{\"uid\":0,\"roomid\":%s,\"protover\":3,\"platform\":\"web\",\"type\":2,\"key\":\"%s\"}", rid, token)
-		log.Println(data)
-		if b, err = biliDataConv.Encode(0x01, 0x00000007, 0x00000001, []byte(data)); err != nil {
-			log.Panicln(err)
+		return biliDataConv.EncodeArgs{
+			Version: 0x0001, Operation: 0x00000007, Sequence: 0x00000001, Body: []byte(data),
 		}
-		return b
 	})
 
 	for {
