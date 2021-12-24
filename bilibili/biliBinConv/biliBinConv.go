@@ -1,4 +1,4 @@
-package biliDataConv
+package biliBinConv
 
 import (
 	"bytes"

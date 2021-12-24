@@ -2,7 +2,7 @@ package main
 
 import (
 	"bilibili-live-communication/bilibili/biliAPI"
-	"bilibili-live-communication/bilibili/biliDataConv"
+	"bilibili-live-communication/bilibili/biliBinConv"
 	"bilibili-live-communication/bilibili/biliJsonConv"
 	"bilibili-live-communication/bilibili/biliWebsocket"
 	"fmt"
@@ -71,12 +71,12 @@ func main() {
 		}
 	}(c)
 
-	sendCannel := make(chan biliDataConv.EncodeArgs)
+	sendCannel := make(chan biliBinConv.EncodeArgs)
 	receiveChannel := make(chan []byte)
-	blw := biliWebsocket.New(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliWebsocket) biliDataConv.EncodeArgs {
+	blw := biliWebsocket.New(c, &receiveChannel, &sendCannel, func(liveWebsocket *biliWebsocket.BiliWebsocket) biliBinConv.EncodeArgs {
 		// 注意，如果获取弹幕地址及Token时，没有携带账号的Cookie，则下面的uid必须为0，否则鉴权失败，直接断开连接
 		data := fmt.Sprintf("{\"uid\":0,\"roomid\":%s,\"protover\":3,\"platform\":\"web\",\"type\":2,\"key\":\"%s\"}", rid, token)
-		return biliDataConv.EncodeArgs{
+		return biliBinConv.EncodeArgs{
 			Version: 0x0001, Operation: 0x00000007, Sequence: 0x00000001, Body: []byte(data),
 		}
 	})

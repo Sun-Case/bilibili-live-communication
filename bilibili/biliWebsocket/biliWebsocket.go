@@ -1,7 +1,7 @@
 package biliWebsocket
 
 import (
-	"bilibili-live-communication/bilibili/biliDataConv"
+	"bilibili-live-communication/bilibili/biliBinConv"
 	"bilibili-live-communication/bilibili/websocketP"
 	"github.com/gorilla/websocket"
 	"log"
@@ -34,7 +34,7 @@ type BiliWebsocket struct {
 	WebsocketP *websocketP.WebSocketP
 
 	// User 与 BiliWebsocket 通信
-	sendCh     *chan biliDataConv.EncodeArgs
+	sendCh     *chan biliBinConv.EncodeArgs
 	receiveCh  *chan []byte
 	IsClosedCh chan struct{}
 
@@ -67,7 +67,7 @@ func (blw *BiliWebsocket) receive() {
 				return
 			}
 
-			bcs, err := biliDataConv.Decode(b)
+			bcs, err := biliBinConv.Decode(b)
 			if err != nil {
 				log.Println(err)
 			} else {
@@ -99,7 +99,7 @@ func (blw *BiliWebsocket) send() {
 			if !ok {
 				return
 			}
-			bin, err := biliDataConv.Encode(b.Version, b.Operation, b.Sequence, b.Body)
+			bin, err := biliBinConv.Encode(b.Version, b.Operation, b.Sequence, b.Body)
 			if err != nil {
 				return
 			}
@@ -165,7 +165,7 @@ func (blw *BiliWebsocket) heartbeat() {
 		select {
 		case <-ticker.C:
 			log.Println("biliWebsocket HeartbeatFunc: heartbeat ticker")
-			if b, err = biliDataConv.Encode(0x01, 0x00000002, 0x00000001, []byte("object Object")); err != nil {
+			if b, err = biliBinConv.Encode(0x01, 0x00000002, 0x00000001, []byte("object Object")); err != nil {
 				return
 			}
 
@@ -201,7 +201,7 @@ func (blw *BiliWebsocket) timeout() {
 	}
 }
 
-func New(conn *websocket.Conn, receiveChannel *chan []byte, sendChannel *chan biliDataConv.EncodeArgs, onOpen func(blw *BiliWebsocket) biliDataConv.EncodeArgs) *BiliWebsocket {
+func New(conn *websocket.Conn, receiveChannel *chan []byte, sendChannel *chan biliBinConv.EncodeArgs, onOpen func(blw *BiliWebsocket) biliBinConv.EncodeArgs) *BiliWebsocket {
 	if debug {
 		log.Println("biliWebSocket NewFunc: Running")
 		defer func() {
