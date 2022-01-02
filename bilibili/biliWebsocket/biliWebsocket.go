@@ -1,13 +1,51 @@
 package biliWebsocket
 
 import (
+	"bilibili-live-communication/bilibili/biliAPI"
 	"bilibili-live-communication/bilibili/biliBinConv"
+	"bilibili-live-communication/bilibili/connEncapsulate"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/url"
 	"time"
 )
+
+func NewBiliWebsocket(roomId string) (connEncapsulate.ReadWriteCloser, error) {
+	roomId_, err := biliAPI.GetRoomInfo(roomId)
+	if err != nil {
+		return nil, err
+	}
+	wsList, token, err := biliAPI.GetDanmuInfo(roomId_)
+	if err != nil {
+		return nil, err
+	}
+	if len(wsList) == 0 {
+		return nil, errors.New("not found websocket url")
+	}
+
+	var BW = new(BiliWebsocket)
+	err = BW.Init(wsList[0], func(self *BiliWebsocket) []byte {
+		return join_room(roomId_, token)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = BW.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	return BW, nil
+}
+
+func join_room(roomId, token string) []byte {
+	data := fmt.Sprintf("{\"uid\":0,\"roomid\":%s,\"protover\":3,\"platform\":\"web\",\"type\":2,\"key\":\"%s\"}", roomId, token)
+	bin, _ := biliBinConv.Encode(0x0001, 0x00000007, 0x00000001, []byte(data))
+	return bin
+}
 
 type BiliWebsocket struct {
 	conn    *websocket.Conn
