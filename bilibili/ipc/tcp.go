@@ -1,18 +1,22 @@
 package ipc
 
-import "net"
+import (
+	"log"
+	"net"
+)
 
-func TcpListener(address string) error {
+func TcpListen(address string) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		return err
+		log.Panicln(err)
 	}
-
 	for {
 		conn, err := listener.Accept()
+		log.Println("new conn:", conn.RemoteAddr())
 		if err != nil {
-			return err
+			log.Panicln(err)
 		}
-		go new(EncapInterface).IPC(conn)
+
+		go IPC(NetConnEncapsulate(conn))
 	}
 }

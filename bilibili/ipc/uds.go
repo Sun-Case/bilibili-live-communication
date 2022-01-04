@@ -1,22 +1,22 @@
 package ipc
 
-import "net"
+import (
+	"log"
+	"net"
+)
 
-/*!
-Unix Domain Socket
-*/
-
-func UdsListen(address string) error {
+func UdsListen(address string) {
 	listener, err := net.Listen("unix", address)
 	if err != nil {
-		return err
+		log.Panicln(err)
 	}
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			return err
+			log.Panicln(err)
 		}
-		go new(EncapInterface).IPC(conn)
+
+		go IPC(NetConnEncapsulate(conn))
 	}
 }
