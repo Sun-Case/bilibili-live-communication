@@ -1,7 +1,6 @@
 package ipc
 
 import (
-	"bilibili-live-communication/bilibili/biliBinConv"
 	"github.com/gorilla/websocket"
 	"log"
 	"net"
@@ -32,14 +31,7 @@ func TestTcpListen(t *testing.T) {
 			log.Println(err)
 			return
 		}
-		d, err := biliBinConv.Decode(message)
-		if err != nil {
-			log.Println(err)
-			return
-		}
 
-		for _, l := range d {
-			log.Println(string(l.Body))
-		}
+		log.Println(string(message))
 	}
 }
